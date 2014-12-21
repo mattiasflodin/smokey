@@ -373,10 +373,10 @@ int main()
         auto&& vertices = vertex_buffer.map();
         vertices[0].x = 0;
         vertices[0].y = 0;
-        vertices[1].x = 0.4;
-        vertices[1].y = 0.2;
-        vertices[2].x = 0.1;
-        vertices[2].y = -0.3;
+        vertices[1].x = 0.4f;
+        vertices[1].y = 0.2f;
+        vertices[2].x = 0.1f;
+        vertices[2].y = -0.3f;
     }
 
     gl_program program;
