@@ -80,6 +80,12 @@ public:
         return _name;
     }
 
+    void bind(GLenum target)
+    {
+        glBindBuffer(target, _name);
+        gl_check_error();
+    }
+
 private:
     GLuint _name;
 };
@@ -90,6 +96,9 @@ class gl_vertex_buffer_map;
 template <class Vertex>
 class gl_vertex_buffer {
 public:
+    static auto const alignment = std::alignment_of<Vertex>::value;
+    static auto const stride = ((sizeof(Vertex) + alignment - 1) / alignment)*alignment;
+
     gl_vertex_buffer(GLsizei size, GLenum usage = GL_STATIC_DRAW) :
         _buffer(GL_ARRAY_BUFFER, size*stride, usage)
     {
@@ -113,12 +122,14 @@ public:
         return _buffer.get();
     }
 
+    void bind()
+    {
+        _buffer.bind(GL_ARRAY_BUFFER);
+    }
+
     gl_vertex_buffer_map<Vertex> map();
 
 private:
-    static auto const alignment = std::alignment_of<Vertex>::value;
-    static auto const stride = ((sizeof(Vertex) + alignment - 1) / alignment)*alignment;
-
     gl_buffer _buffer;
 };
 
@@ -337,6 +348,12 @@ struct Vertex
     float y;
 };
 
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{
+    glViewport(0, 0, width, height);
+}
+
+
 int main()
 {
     glfw_context glfw;
@@ -345,22 +362,21 @@ int main()
     if(!window)
         return 1;
     glfwMakeContextCurrent(window);
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     GLenum err = glewInit();
     if(GLEW_OK != err)
         return 1;
 
-    gl_vertex_buffer<Vertex> vertex_buffer(4);
+    gl_vertex_buffer<Vertex> vertex_buffer(3);
     {
         auto&& vertices = vertex_buffer.map();
-        vertices[0].x = -1;
-        vertices[0].y = -1;
-        vertices[1].x = 1;
-        vertices[1].y = -1;
-        vertices[2].x = 1;
-        vertices[2].y = 1;
-        vertices[3].x = -1;
-        vertices[3].y = 1;
+        vertices[0].x = -0.5;
+        vertices[0].y = -0.5;
+        vertices[1].x = 0.5;
+        vertices[1].y = -0.5;
+        vertices[2].x = 0.5;
+        vertices[2].y = 0.5;
     }
 
     gl_program program;
@@ -369,7 +385,16 @@ int main()
         .attach(load_shader(GL_FRAGMENT_SHADER, "src\\fragment.glsl"))
         .link();
 
+    glEnableVertexAttribArray(0);
+    gl_check_error();
+
     while(!glfwWindowShouldClose(window)) {
+        vertex_buffer.bind();
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, vertex_buffer.stride, nullptr);
+        gl_check_error();
+
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+        gl_check_error();
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
