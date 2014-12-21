@@ -1,8 +1,8 @@
-#version 100
+#version 110
 
 attribute vec2 g_position;
 
 void main(void)
 {
-    gl_Position = vec4(g_position.x, g_position.y, 0.0, 0.0);
+    gl_Position = vec4(g_position.x, g_position.y, 0.0, 1.0);
 }

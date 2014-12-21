@@ -388,7 +388,13 @@ int main()
     glEnableVertexAttribArray(0);
     gl_check_error();
 
+    program.use();
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+
     while(!glfwWindowShouldClose(window)) {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        gl_check_error();
         vertex_buffer.bind();
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, vertex_buffer.stride, nullptr);
         gl_check_error();
