@@ -368,11 +368,15 @@ int main()
     if(GLEW_OK != err)
         return 1;
 
-    gl_vertex_buffer<Vertex> vertex_buffer(1);
+    gl_vertex_buffer<Vertex> vertex_buffer(3);
     {
         auto&& vertices = vertex_buffer.map();
         vertices[0].x = 0;
         vertices[0].y = 0;
+        vertices[1].x = 0.4;
+        vertices[1].y = 0.2;
+        vertices[2].x = 0.1;
+        vertices[2].y = -0.3;
     }
 
     gl_program program;
@@ -396,7 +400,7 @@ int main()
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, vertex_buffer.stride, nullptr);
         gl_check_error();
 
-        glDrawArrays(GL_POINTS, 0, 1);
+        glDrawArrays(GL_POINTS, 0, 3);
         gl_check_error();
         glfwSwapBuffers(window);
         glfwPollEvents();
