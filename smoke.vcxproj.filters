@@ -5,7 +5,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
-    <None Include="src\vertex.glsl" />
-    <None Include="src\fragment.glsl" />
+    <None Include="src\particle.frag" />
+    <None Include="src\particle.geom" />
+    <None Include="src\particle.vert" />
   </ItemGroup>
 </Project>

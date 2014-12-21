@@ -74,8 +74,9 @@
       <FileType>CppCode</FileType>
     </None>
     <ClCompile Include="src\smoke.cpp" />
-    <None Include="src\fragment.glsl" />
-    <None Include="src\vertex.glsl" />
+    <None Include="src\particle.frag" />
+    <None Include="src\particle.geom" />
+    <None Include="src\particle.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

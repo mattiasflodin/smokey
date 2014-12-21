@@ -368,29 +368,26 @@ int main()
     if(GLEW_OK != err)
         return 1;
 
-    gl_vertex_buffer<Vertex> vertex_buffer(3);
+    gl_vertex_buffer<Vertex> vertex_buffer(1);
     {
         auto&& vertices = vertex_buffer.map();
-        vertices[0].x = -0.5;
-        vertices[0].y = -0.5;
-        vertices[1].x = 0.5;
-        vertices[1].y = -0.5;
-        vertices[2].x = 0.5;
-        vertices[2].y = 0.5;
+        vertices[0].x = 0;
+        vertices[0].y = 0;
     }
 
     gl_program program;
     program
-        .attach(load_shader(GL_VERTEX_SHADER, "src\\vertex.glsl"))
-        .attach(load_shader(GL_FRAGMENT_SHADER, "src\\fragment.glsl"))
+        .attach(load_shader(GL_VERTEX_SHADER, "src\\particle.vert"))
+        .attach(load_shader(GL_GEOMETRY_SHADER, "src\\particle.geom"))
+        .attach(load_shader(GL_FRAGMENT_SHADER, "src\\particle.frag"))
         .link();
 
     glEnableVertexAttribArray(0);
     gl_check_error();
 
     program.use();
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
+    glDisable(GL_CULL_FACE);
+    //glCullFace(GL_BACK);
 
     while(!glfwWindowShouldClose(window)) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -399,7 +396,7 @@ int main()
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, vertex_buffer.stride, nullptr);
         gl_check_error();
 
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawArrays(GL_POINTS, 0, 1);
         gl_check_error();
         glfwSwapBuffers(window);
         glfwPollEvents();
