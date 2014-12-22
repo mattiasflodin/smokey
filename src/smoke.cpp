@@ -321,6 +321,12 @@ public:
             throw std::runtime_error("link failed");
     }
 
+    void uniform(GLint location, float v)
+    {
+        glProgramUniform1f(_program, location, v);
+        gl_check_error();
+    }
+
     void use()
     {
         glUseProgram(_program);
@@ -348,8 +354,11 @@ struct Vertex
     float y;
 };
 
+float g_aspect = 1.0f;
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
+    g_aspect = static_cast<float>(width) / static_cast<float>(height);
     glViewport(0, 0, width, height);
 }
 
@@ -363,6 +372,7 @@ int main()
         return 1;
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    framebuffer_size_callback(window, 640, 480);
 
     GLenum err = glewInit();
     if(GLEW_OK != err)
@@ -399,6 +409,7 @@ int main()
         vertex_buffer.bind();
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, vertex_buffer.stride, nullptr);
         gl_check_error();
+        program.uniform(0, g_aspect);
 
         glDrawArrays(GL_POINTS, 0, 3);
         gl_check_error();
