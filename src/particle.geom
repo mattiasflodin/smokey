@@ -2,6 +2,7 @@
 
 layout(points) in;
 layout(triangle_strip, max_vertices=34) out;
+out float g_Distance;
 
 const float PARTICLE_RADIUS = 0.05;
 
@@ -9,8 +10,10 @@ void emit(vec2 point_on_circle)
 {
     gl_Position = vec4(gl_in[0].gl_Position.xy + PARTICLE_RADIUS*point_on_circle,
         gl_in[0].gl_Position.zw);
+    g_Distance = 0.0;
     EmitVertex();
     gl_Position = gl_in[0].gl_Position;
+    g_Distance = 1.0;
     EmitVertex();
 }
 

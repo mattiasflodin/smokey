@@ -1,6 +1,8 @@
-#version 110
+#version 130
+
+in float g_Distance;
 
 void main()
 {
-    gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+    gl_FragColor = vec4(g_Distance, g_Distance, g_Distance, 1.0);
 }
