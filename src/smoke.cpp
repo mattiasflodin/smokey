@@ -3,8 +3,7 @@
 #include <fstream>      // ifstream
 #include <algorithm>    // move, swap
 #include <stdexcept>
-
-#include <windows.h>
+#include <iostream>
 
 #define GLEW_STATIC
 #include <GL/glew.h>
@@ -264,7 +263,7 @@ public:
             gl_check_error();
             std::vector<GLchar> infolog(length);
             glGetShaderInfoLog(_shader.get(), length, nullptr, infolog.data());
-            OutputDebugStringA(infolog.data());
+            std::cerr << infolog.data();
             throw std::runtime_error("shader compilation failed");
         }
     }
