@@ -3,6 +3,7 @@
 #include <fstream>      // ifstream
 #include <algorithm>    // move, swap
 #include <stdexcept>
+#include <random>
 #include <iostream>
 
 #define GLEW_STATIC
@@ -377,15 +378,17 @@ int main()
     if(GLEW_OK != err)
         return 1;
 
-    gl_vertex_buffer<Vertex> vertex_buffer(3);
+    std::size_t const N_PARTICLES = 100;
+    std::mt19937 rng_engine;
+    std::uniform_real_distribution<float> rng(-0.5, 0.5);
+    gl_vertex_buffer<Vertex> vertex_buffer(N_PARTICLES);
     {
         auto&& vertices = vertex_buffer.map();
-        vertices[0].x = 0;
-        vertices[0].y = 0;
-        vertices[1].x = 0.4f;
-        vertices[1].y = 0.2f;
-        vertices[2].x = 0.1f;
-        vertices[2].y = -0.3f;
+        for(std::size_t i = 0; i != N_PARTICLES; ++i)
+        {
+            vertices[i].x = rng(rng_engine);
+            vertices[i].y = rng(rng_engine);
+        }
     }
 
     gl_program program;
@@ -410,7 +413,10 @@ int main()
         gl_check_error();
         program.uniform(0, g_aspect);
 
-        glDrawArrays(GL_POINTS, 0, 3);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_ONE, GL_ONE);
+
+        glDrawArrays(GL_POINTS, 0, N_PARTICLES);
         gl_check_error();
         glfwSwapBuffers(window);
         glfwPollEvents();
