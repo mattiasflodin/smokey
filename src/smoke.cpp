@@ -1,3 +1,5 @@
+#include "vec2.hpp"
+
 #include <vector>
 #include <type_traits>  // alignment_of
 #include <fstream>      // ifstream
@@ -90,14 +92,14 @@ private:
     GLuint _name;
 };
 
-template <class Vertex>
+template <class vertex>
 class gl_vertex_buffer_map;
 
-template <class Vertex>
+template <class vertex>
 class gl_vertex_buffer {
 public:
-    static auto const alignment = std::alignment_of<Vertex>::value;
-    static auto const stride = ((sizeof(Vertex) + alignment - 1) / alignment)*alignment;
+    static auto const alignment = std::alignment_of<vertex>::value;
+    static auto const stride = ((sizeof(vertex) + alignment - 1) / alignment)*alignment;
 
     gl_vertex_buffer(GLsizei size, GLenum usage = GL_STATIC_DRAW) :
         _buffer(GL_ARRAY_BUFFER, size*stride, usage)
@@ -127,16 +129,16 @@ public:
         _buffer.bind(GL_ARRAY_BUFFER);
     }
 
-    gl_vertex_buffer_map<Vertex> map();
+    gl_vertex_buffer_map<vertex> map();
 
 private:
     gl_buffer _buffer;
 };
 
-template <class Vertex>
+template <class vertex>
 class gl_vertex_buffer_map {
 public:
-    gl_vertex_buffer_map(gl_vertex_buffer<Vertex>& buffer, GLenum access = GL_WRITE_ONLY) :
+    gl_vertex_buffer_map(gl_vertex_buffer<vertex>& buffer, GLenum access = GL_WRITE_ONLY) :
         _p(map_buffer(buffer, access)),
         _buffer(buffer)
     {
@@ -168,43 +170,43 @@ public:
         return *this;
     }
 
-    Vertex* data()
+    vertex* data()
     {
         return _p;
     }
 
-    Vertex const* data() const
+    vertex const* data() const
     {
         return _p;
     }
 
-    Vertex& operator[](std::ptrdiff_t i)
+    vertex& operator[](std::ptrdiff_t i)
     {
         return _p[i];
     }
 
-    Vertex const& operator[](std::ptrdiff_t i) const
+    vertex const& operator[](std::ptrdiff_t i) const
     {
         return _p[i];
     }
 
 private:
-    static Vertex* map_buffer(gl_vertex_buffer<Vertex>& buffer, GLenum access)
+    static vertex* map_buffer(gl_vertex_buffer<vertex>& buffer, GLenum access)
     {
         glBindBuffer(GL_ARRAY_BUFFER, buffer.get());
         gl_check_error();
-        auto p = static_cast<Vertex*>(glMapBuffer(GL_ARRAY_BUFFER, access));
+        auto p = static_cast<vertex*>(glMapBuffer(GL_ARRAY_BUFFER, access));
         gl_check_error(p);
         return p;
     }
-    Vertex* _p;
-    gl_vertex_buffer<Vertex>& _buffer;
+    vertex* _p;
+    gl_vertex_buffer<vertex>& _buffer;
 };
 
-template <class Vertex>
-gl_vertex_buffer_map<Vertex> gl_vertex_buffer<Vertex>::map()
+template <class vertex>
+gl_vertex_buffer_map<vertex> gl_vertex_buffer<vertex>::map()
 {
-    return gl_vertex_buffer_map<Vertex>(*this);
+    return gl_vertex_buffer_map<vertex>(*this);
 }
 namespace detail
 {
@@ -348,10 +350,9 @@ gl_shader load_shader(GLenum type, char const* path)
     return shader;
 }
 
-struct Vertex
+struct vertex
 {
-    float x;
-    float y;
+    vec2 position;
 };
 
 float g_aspect = 1.0f;
@@ -360,6 +361,16 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     g_aspect = static_cast<float>(width) / static_cast<float>(height);
     glViewport(0, 0, width, height);
+}
+
+std::size_t const N_PARTICLES = 100;
+
+void simulate(std::vector<vec2>& positions, std::vector<vec2>& velocities, float dt)
+{
+    for(std::size_t i = 0; i != N_PARTICLES; ++i)
+    {
+        vec2 velocity = velocities[i]
+    }
 }
 
 
@@ -378,17 +389,20 @@ int main()
     if(GLEW_OK != err)
         return 1;
 
-    std::size_t const N_PARTICLES = 100;
     std::mt19937 rng_engine;
-    std::uniform_real_distribution<float> rng(-0.5, 0.5);
-    gl_vertex_buffer<Vertex> vertex_buffer(N_PARTICLES);
+    std::uniform_real_distribution<float> rng(-0.75, 0.75);
+    std::vector<vec2> positions(N_PARTICLES);
+    for(std::size_t i = 0; i != N_PARTICLES; ++i)
+    {
+        positions[i] = vec2(rng(rng_engine), rng(rng_engine));
+    }
+    std::vector<vec2> velocities(N_PARTICLES);
+
+    gl_vertex_buffer<vertex> vertex_buffer(N_PARTICLES);
     {
         auto&& vertices = vertex_buffer.map();
-        for(std::size_t i = 0; i != N_PARTICLES; ++i)
-        {
-            vertices[i].x = rng(rng_engine);
-            vertices[i].y = rng(rng_engine);
-        }
+        static_assert(sizeof(vertex) == sizeof(positions[0]), "vertex size does not match position size");
+        std::memcpy(vertices.data(), positions.data(), sizeof(vertex)*N_PARTICLES);
     }
 
     gl_program program;
