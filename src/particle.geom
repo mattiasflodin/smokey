@@ -1,9 +1,8 @@
 #version 150
-#extension GL_ARB_explicit_uniform_location: enable
 
 layout(points) in;
 layout(triangle_strip, max_vertices=34) out;
-layout(location=0) uniform float g_aspect;
+uniform float g_aspect;
 out float g_Distance;
 
 const float PARTICLE_RADIUS = 0.05;

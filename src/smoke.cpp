@@ -323,10 +323,11 @@ public:
             throw std::runtime_error("link failed");
     }
 
-    void uniform(GLint location, float v)
+    GLint uniform_location(GLchar const* name)
     {
-        glProgramUniform1f(_program, location, v);
+        auto location = glGetUniformLocation(_program, name);
         gl_check_error();
+        return location;
     }
 
     void use()
@@ -369,7 +370,7 @@ void simulate(std::vector<vec2>& positions, std::vector<vec2>& velocities, float
 {
     for(std::size_t i = 0; i != N_PARTICLES; ++i)
     {
-        vec2 velocity = velocities[i]
+       //vec2 velocity = velocities[i]
     }
 }
 
@@ -419,13 +420,16 @@ int main()
     glDisable(GL_CULL_FACE);
     //glCullFace(GL_BACK);
 
+    auto aspect_location = program.uniform_location("g_aspect");
+
     while(!glfwWindowShouldClose(window)) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         gl_check_error();
         vertex_buffer.bind();
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, vertex_buffer.stride, nullptr);
         gl_check_error();
-        program.uniform(0, g_aspect);
+        glUniform1f(aspect_location, g_aspect);
+        gl_check_error();
 
         glEnable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE);
