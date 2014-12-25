@@ -1,4 +1,5 @@
 #include "vec2.hpp"
+#include "timer.hpp"
 
 #include <vector>
 #include <type_traits>  // alignment_of
@@ -364,15 +365,30 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     glViewport(0, 0, width, height);
 }
 
-std::size_t const N_PARTICLES = 100;
+std::size_t const N_PARTICLES = 10000;
 
 void simulate(std::vector<vec2>& positions, std::vector<vec2>& velocities, float dt)
 {
+    float const GRAVITY = 0.05f;
     for(std::size_t i = 0; i != N_PARTICLES; ++i)
     {
-       //vec2 velocity = velocities[i]
+        vec2 pos = positions[i];
+        vec2 acceleration = -pos*GRAVITY;
+        vec2 velocity = velocities[i];
+        velocity += dt*acceleration;
+        pos += dt*velocity;
+        positions[i] = pos;
+        velocities[i] = velocity;
     }
 }
+
+void commit_particles(gl_vertex_buffer<vertex>& vertex_buffer, std::vector<vec2> const& positions)
+{
+    auto&& vertices = vertex_buffer.map();
+    static_assert(sizeof(vertex) == sizeof(positions[0]), "vertex size does not match position size");
+    std::memcpy(vertices.data(), positions.data(), sizeof(vertex)*N_PARTICLES);
+}
+
 
 
 int main()
@@ -391,21 +407,16 @@ int main()
         return 1;
 
     std::mt19937 rng_engine;
-    std::uniform_real_distribution<float> rng(-0.75, 0.75);
+    std::uniform_real_distribution<float> rng(-1.0f, 1.0f);
     std::vector<vec2> positions(N_PARTICLES);
+    std::vector<vec2> velocities(N_PARTICLES);
     for(std::size_t i = 0; i != N_PARTICLES; ++i)
     {
-        positions[i] = vec2(rng(rng_engine), rng(rng_engine));
+        positions[i] = 0.75f*vec2(rng(rng_engine), rng(rng_engine));
+        velocities[i] = 0.1f*rng(rng_engine)*normalize(vec2(rng(rng_engine), rng(rng_engine)));
     }
-    std::vector<vec2> velocities(N_PARTICLES);
 
     gl_vertex_buffer<vertex> vertex_buffer(N_PARTICLES);
-    {
-        auto&& vertices = vertex_buffer.map();
-        static_assert(sizeof(vertex) == sizeof(positions[0]), "vertex size does not match position size");
-        std::memcpy(vertices.data(), positions.data(), sizeof(vertex)*N_PARTICLES);
-    }
-
     gl_program program;
     program
         .attach(load_shader(GL_VERTEX_SHADER, "src\\particle.vert"))
@@ -422,14 +433,20 @@ int main()
 
     auto aspect_location = program.uniform_location("g_aspect");
 
+    class timer timer;
+    unsigned frame_time = 0;
     while(!glfwWindowShouldClose(window)) {
+        simulate(positions, velocities, static_cast<float>(1.0)/16);
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        gl_check_error();
-        vertex_buffer.bind();
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, vertex_buffer.stride, nullptr);
         gl_check_error();
         glUniform1f(aspect_location, g_aspect);
         gl_check_error();
+
+        vertex_buffer.bind();
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, vertex_buffer.stride, nullptr);
+        gl_check_error();
+        commit_particles(vertex_buffer, positions);
 
         glEnable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE);
@@ -438,6 +455,9 @@ int main()
         gl_check_error();
         glfwSwapBuffers(window);
         glfwPollEvents();
+
+        frame_time += 16;
+        timer.sleep_until(frame_time);
     }
     return 0;
 }

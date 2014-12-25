@@ -1,3 +1,7 @@
+#include <cmath>
+#include <limits>
+#include <mmintrin.h>
+
 class vec2
 {
 public:
@@ -8,36 +12,70 @@ public:
     {
     }
     vec2(float x, float y) :
-        _x(x),
-        _y(y)
+        x(x),
+        y(y)
     {
     }
 
     vec2& operator+=(vec2 const& other)
     {
-        _x += other._x;
-        _y += other._y;
+        x += other.x;
+        y += other.y;
         return *this;
     }
 
     vec2& operator*=(vec2 const& other)
     {
-        _x *= other._x;
-        _y *= other._y;
+        x *= other.x;
+        y *= other.y;
         return *this;
     }
 
-private:
-    float _x;
-    float _y;
+    vec2& operator*=(float other)
+    {
+        x *= other;
+        y *= other;
+        return *this;
+    }
+
+    float x;
+    float y;
 };
 
-vec2 operator+(vec2 const& lhs, vec2 const& rhs)
+inline vec2 operator+(vec2 const& lhs, vec2 const& rhs)
 {
     return vec2(lhs) += rhs;
 }
 
-vec2 operator*(vec2 const& lhs, vec2 const& rhs)
+inline vec2 operator*(vec2 const& lhs, vec2 const& rhs)
 {
     return vec2(lhs) *= rhs;
+}
+
+inline vec2 operator*(vec2 const& lhs, float rhs)
+{
+    return vec2(lhs)*=rhs;
+}
+
+inline vec2 operator*(float lhs, vec2 const& rhs)
+{
+    return vec2(rhs) *= lhs;
+}
+
+inline vec2 operator-(vec2 const& v)
+{
+    return vec2(-v.x, -v.y);
+}
+
+inline float dot(vec2 const& lhs, vec2 const& rhs)
+{
+    return lhs.x*rhs.x + lhs.y*rhs.y;
+}
+
+inline vec2 normalize(vec2 const& v)
+{
+    float length = std::sqrt(dot(v, v));
+    if(length < std::numeric_limits<float>::epsilon())
+        return vec2(0, 0);
+    return v*(1.0f / length);
 }

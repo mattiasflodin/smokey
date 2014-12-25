@@ -5,7 +5,7 @@ layout(triangle_strip, max_vertices=34) out;
 uniform float g_aspect;
 out float g_Distance;
 
-const float PARTICLE_RADIUS = 0.05;
+const float PARTICLE_RADIUS = 0.01;
 
 void emit(vec2 point_on_circle)
 {
