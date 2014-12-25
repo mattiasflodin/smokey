@@ -12,5 +12,6 @@
   <ItemGroup>
     <ClInclude Include="src\vec2.hpp" />
     <ClInclude Include="src\timer.hpp" />
+    <ClInclude Include="src\gl.hpp" />
   </ItemGroup>
 </Project>
