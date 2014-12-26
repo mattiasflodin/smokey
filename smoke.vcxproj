@@ -81,6 +81,7 @@
   <ItemGroup>
     <ClInclude Include="src\gl.hpp" />
     <ClInclude Include="src\timer.hpp" />
+    <ClInclude Include="src\valarray.hpp" />
     <ClInclude Include="src\vec2.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
