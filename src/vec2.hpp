@@ -2,8 +2,7 @@
 #include <limits>
 #include <mmintrin.h>
 
-class vec2
-{
+class vec2 {
 public:
     vec2() : vec2(0.0f)
     {
